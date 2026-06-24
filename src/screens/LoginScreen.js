@@ -34,6 +34,10 @@ export default function LoginScreen({ navigation }) {
       await login(email.trim(), password);
       // On success, the navigator swaps to the app stack automatically.
     } catch (err) {
+      if (err.response?.status === 403 && err.response?.data?.requiresVerification) {
+        navigation.navigate('Verify', { email: email.trim() });
+        return;
+      }
       setError(err.response?.data?.message || 'Unable to sign in. Please try again.');
     } finally {
       setLoading(false);

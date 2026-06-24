@@ -1,7 +1,7 @@
 // =====================================================================
 //  AuthContext — manages the user session on mobile.
-//  Persists the JWT + user in AsyncStorage so the login survives
-//  app restarts. Exposes login / register / logout.
+//  Persists the JWT + user in AsyncStorage. New accounts must verify
+//  their email (verifyEmail) before they are signed in.
 // =====================================================================
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,9 +11,8 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // true while restoring session on launch
+  const [loading, setLoading] = useState(true);
 
-  // Restore any saved session when the app starts.
   useEffect(() => {
     (async () => {
       try {
@@ -39,10 +38,22 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
+  // Creates the account and triggers the email code. Does NOT sign in.
   const register = useCallback(async (payload) => {
     const { data } = await api.post('/auth/register', payload);
+    return data; // { requiresVerification, email, message }
+  }, []);
+
+  // Confirms the emailed code, then signs the user in.
+  const verifyEmail = useCallback(async (email, code) => {
+    const { data } = await api.post('/auth/verify-email', { email, code });
     await persist(data.token, data.user);
     return data.user;
+  }, []);
+
+  const resendCode = useCallback(async (email) => {
+    const { data } = await api.post('/auth/resend-code', { email });
+    return data;
   }, []);
 
   const logout = useCallback(async () => {
@@ -50,13 +61,21 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const role = user?.role || null;
   const value = {
     user,
     loading,
+    role,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin',
+    isAdmin: role === 'admin',
+    isHod: role === 'hod',
+    isLecturer: role === 'lecturer',
+    isStaff: role === 'admin' || role === 'hod' || role === 'lecturer',
+    canApprove: role === 'admin' || role === 'hod',
     login,
     register,
+    verifyEmail,
+    resendCode,
     logout,
   };
 

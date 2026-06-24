@@ -1,5 +1,6 @@
-// Admin screen — manage the archive: add, edit, delete projects.
-// Only reachable by admins (the backend also enforces this on writes).
+// Manage screen — staff (admin, HoD, lecturer).
+//   admin / HoD : add, edit, delete take effect immediately.
+//   lecturer    : the same actions are submitted to the HoD as requests.
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import {
   View,
@@ -11,11 +12,13 @@ import {
   Alert,
 } from 'react-native';
 import api from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import ProjectFormModal from './ProjectFormModal';
 import Button from '../components/Button';
 import { colors, fonts, spacing, radius, shadow } from '../theme';
 
 export default function AdminScreen({ navigation }) {
+  const { isLecturer } = useAuth();
   const [projects, setProjects] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,54 +38,50 @@ export default function AdminScreen({ navigation }) {
       setProjects(projRes.data.data);
       setSupervisors(supRes.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not load the dashboard.');
+      setError(err.response?.data?.message || 'Could not load the page.');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const openAdd = () => { setEditing(null); setModalOpen(true); };
+  const openEdit = (project) => { setEditing(project); setModalOpen(true); };
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <Pressable onPress={openAdd} hitSlop={10}>
-          <Text style={styles.addBtn}>+ Add</Text>
+          <Text style={styles.addBtn}>{isLecturer ? '+ Propose' : '+ Add'}</Text>
         </Pressable>
       ),
     });
-  }, [navigation]);
+  }, [navigation, isLecturer]);
 
-  const openAdd = () => {
-    setEditing(null);
-    setModalOpen(true);
-  };
-  const openEdit = (project) => {
-    setEditing(project);
-    setModalOpen(true);
-  };
-
-  const handleSaved = async () => {
+  const handleSaved = async (message) => {
     setModalOpen(false);
     setEditing(null);
     await loadData();
+    if (message) Alert.alert(isLecturer ? 'Submitted' : 'Done', message);
   };
 
   const confirmDelete = (project) => {
     Alert.alert(
-      'Delete project?',
-      `This will permanently remove "${project.title}". This cannot be undone.`,
+      isLecturer ? 'Request deletion?' : 'Delete project?',
+      isLecturer
+        ? `This will send a request to remove "${project.title}" to the Head of Department for approval.`
+        : `This will permanently remove "${project.title}". This cannot be undone.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Delete',
-          style: 'destructive',
+          text: isLecturer ? 'Submit request' : 'Delete',
+          style: isLecturer ? 'default' : 'destructive',
           onPress: async () => {
             try {
-              await api.delete(`/projects/${project.project_id}`);
+              const res = await api.delete(`/projects/${project.project_id}`);
               await loadData();
+              if (res.data?.message) Alert.alert(isLecturer ? 'Submitted' : 'Done', res.data.message);
             } catch (err) {
               Alert.alert('Error', err.response?.data?.message || 'Could not delete the project.');
             }
@@ -102,6 +101,13 @@ export default function AdminScreen({ navigation }) {
 
   return (
     <View style={styles.flex}>
+      {isLecturer ? (
+        <View style={styles.hint}>
+          <Text style={styles.hintText}>
+            Your additions, edits and deletions are sent to the Head of Department for approval.
+          </Text>
+        </View>
+      ) : null}
       {error ? (
         <View style={styles.alert}>
           <Text style={styles.alertText}>{error}</Text>
@@ -114,15 +120,15 @@ export default function AdminScreen({ navigation }) {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.center}>
-            <Text style={styles.emptyText}>No projects yet. Tap “+ Add” to create the first one.</Text>
+            <Text style={styles.emptyText}>
+              No projects yet. Tap “{isLecturer ? '+ Propose' : '+ Add'}” to create the first one.
+            </Text>
           </View>
         }
         renderItem={({ item }) => (
           <View style={styles.row}>
             <View style={styles.rowInfo}>
-              <Text style={styles.rowTitle} numberOfLines={2}>
-                {item.title}
-              </Text>
+              <Text style={styles.rowTitle} numberOfLines={2}>{item.title}</Text>
               <Text style={styles.rowMeta}>
                 {item.student_name} · {item.year_completed} · {item.supervisor_name}
               </Text>
@@ -139,10 +145,8 @@ export default function AdminScreen({ navigation }) {
         visible={modalOpen}
         initial={editing}
         supervisors={supervisors}
-        onClose={() => {
-          setModalOpen(false);
-          setEditing(null);
-        }}
+        pendingMode={isLecturer}
+        onClose={() => { setModalOpen(false); setEditing(null); }}
         onSaved={handleSaved}
       />
     </View>
@@ -154,6 +158,9 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xxl },
   listContent: { padding: spacing.xl, flexGrow: 1 },
   addBtn: { fontFamily: fonts.bodySemiBold, color: colors.goldDeep, fontSize: 15 },
+
+  hint: { backgroundColor: colors.goldWash, margin: spacing.xl, marginBottom: 0, borderRadius: radius.sm, padding: spacing.md },
+  hintText: { fontFamily: fonts.bodyMedium, color: colors.goldDeep, fontSize: 13 },
 
   alert: { backgroundColor: colors.dangerWash, margin: spacing.xl, borderRadius: radius.sm, padding: spacing.md },
   alertText: { fontFamily: fonts.bodyMedium, color: colors.danger, fontSize: 14 },

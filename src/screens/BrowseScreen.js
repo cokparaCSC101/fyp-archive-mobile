@@ -22,7 +22,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 9 }, (_, i) => CURRENT_YEAR - i);
 
 export default function BrowseScreen({ navigation }) {
-  const { isAdmin, logout } = useAuth();
+  const { isStaff, canApprove, isLecturer, logout } = useAuth();
 
   const [projects, setProjects] = useState([]);
   const [page, setPage] = useState(1);
@@ -91,10 +91,24 @@ export default function BrowseScreen({ navigation }) {
 
   const renderHeader = () => (
     <View>
-      {isAdmin && (
-        <Pressable style={styles.manageBtn} onPress={() => navigation.navigate('Admin')}>
-          <Text style={styles.manageText}>Manage archive  →</Text>
-        </Pressable>
+      {(isStaff || canApprove) && (
+        <View style={styles.navRow}>
+          {isStaff && (
+            <Pressable style={styles.navChip} onPress={() => navigation.navigate('Admin')}>
+              <Text style={styles.navChipText}>Manage  →</Text>
+            </Pressable>
+          )}
+          {canApprove && (
+            <Pressable style={styles.navChip} onPress={() => navigation.navigate('Approvals')}>
+              <Text style={styles.navChipText}>Approvals  →</Text>
+            </Pressable>
+          )}
+          {isLecturer && (
+            <Pressable style={styles.navChip} onPress={() => navigation.navigate('MyRequests')}>
+              <Text style={styles.navChipText}>My Requests  →</Text>
+            </Pressable>
+          )}
+        </View>
       )}
 
       <Text style={styles.eyebrow}>COMPUTER SCIENCE DEPARTMENT</Text>
@@ -209,15 +223,14 @@ const styles = StyleSheet.create({
   listContent: { padding: spacing.xl, paddingBottom: spacing.xxl, flexGrow: 1 },
   signOut: { fontFamily: fonts.bodySemiBold, color: colors.goldDeep, fontSize: 14 },
 
-  manageBtn: {
+  navRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg },
+  navChip: {
     backgroundColor: colors.goldWash,
     borderRadius: radius.sm,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    alignItems: 'center',
   },
-  manageText: { fontFamily: fonts.bodySemiBold, color: colors.goldDeep, fontSize: 14 },
+  navChipText: { fontFamily: fonts.bodySemiBold, color: colors.goldDeep, fontSize: 13.5 },
 
   eyebrow: { fontFamily: fonts.bodySemiBold, fontSize: 11, letterSpacing: 1.5, color: colors.goldDeep },
   title: { fontFamily: fonts.displaySemiBold, fontSize: 28, color: colors.ink, marginTop: 4, marginBottom: spacing.lg },

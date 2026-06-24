@@ -21,9 +21,12 @@ import {
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
+import VerifyScreen from './src/screens/VerifyScreen';
 import BrowseScreen from './src/screens/BrowseScreen';
 import ProjectDetailScreen from './src/screens/ProjectDetailScreen';
 import AdminScreen from './src/screens/AdminScreen';
+import ApprovalsScreen from './src/screens/ApprovalsScreen';
+import MyRequestsScreen from './src/screens/MyRequestsScreen';
 import { colors, fonts } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -64,11 +67,22 @@ function RootNavigator() {
               component={AdminScreen}
               options={{ title: 'Manage Archive', headerBackTitle: 'Back' }}
             />
+            <Stack.Screen
+              name="Approvals"
+              component={ApprovalsScreen}
+              options={{ title: 'Approvals', headerBackTitle: 'Back' }}
+            />
+            <Stack.Screen
+              name="MyRequests"
+              component={MyRequestsScreen}
+              options={{ title: 'My Requests', headerBackTitle: 'Back' }}
+            />
           </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Register" component={RegisterScreen} options={{ title: '', headerBackTitle: 'Back' }} />
+            <Stack.Screen name="Verify" component={VerifyScreen} options={{ title: '', headerBackTitle: 'Back' }} />
           </>
         )}
       </Stack.Navigator>

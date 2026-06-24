@@ -43,6 +43,7 @@ export default function RegisterScreen({ navigation }) {
     setLoading(true);
     try {
       await register({ ...form, email: form.email.trim() });
+      navigation.navigate('Verify', { email: form.email.trim() });
     } catch (err) {
       setError(err.response?.data?.message || 'Unable to register. Please try again.');
     } finally {

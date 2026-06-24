@@ -1,4 +1,6 @@
-// Add / edit project form, shown in a modal on the admin screen.
+// Add / edit project form, shown in a modal on the manage screen.
+// When pendingMode is true (lecturers), labels reflect that the change is
+// submitted to the HoD for approval rather than applied directly.
 import { useState, useEffect } from 'react';
 import {
   View,
@@ -21,10 +23,11 @@ const emptyForm = {
   year_completed: String(new Date().getFullYear()),
   abstract: '',
   project_link: '',
+  project_webapp_link: '',
   supervisor_id: '',
 };
 
-export default function ProjectFormModal({ visible, initial, supervisors, onClose, onSaved }) {
+export default function ProjectFormModal({ visible, initial, supervisors, onClose, onSaved, pendingMode = false }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -38,6 +41,7 @@ export default function ProjectFormModal({ visible, initial, supervisors, onClos
         year_completed: String(initial.year_completed || new Date().getFullYear()),
         abstract: initial.abstract || '',
         project_link: initial.project_link || '',
+        project_webapp_link: initial.project_webapp_link || '',
         supervisor_id: initial.supervisor_id ? String(initial.supervisor_id) : '',
       });
     } else {
@@ -61,15 +65,18 @@ export default function ProjectFormModal({ visible, initial, supervisors, onClos
     setSaving(true);
     try {
       const payload = { ...form, year_completed: parseInt(form.year_completed, 10) };
-      if (initial) await api.put(`/projects/${initial.project_id}`, payload);
-      else await api.post('/projects', payload);
-      onSaved();
+      const res = initial
+        ? await api.put(`/projects/${initial.project_id}`, payload)
+        : await api.post('/projects', payload);
+      onSaved(res.data?.message);
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong. Please try again.');
     } finally {
       setSaving(false);
     }
   };
+
+  const submitLabel = pendingMode ? 'Submit' : initial ? 'Save' : 'Add';
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -86,6 +93,13 @@ export default function ProjectFormModal({ visible, initial, supervisors, onClos
           </View>
 
           <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+            {pendingMode ? (
+              <View style={styles.hint}>
+                <Text style={styles.hintText}>
+                  This submission will be sent to the Head of Department for approval before it appears in the archive.
+                </Text>
+              </View>
+            ) : null}
             {error ? (
               <View style={styles.alert}>
                 <Text style={styles.alertText}>{error}</Text>
@@ -142,12 +156,24 @@ export default function ProjectFormModal({ visible, initial, supervisors, onClos
               />
             </Field>
 
-            <Field label="Project Link (optional)">
+            <Field label="Document Link (optional)">
               <TextInput
                 style={styles.input}
                 value={form.project_link}
                 onChangeText={(v) => setField('project_link', v)}
-                placeholder="https://…"
+                placeholder="https://… link to the full document"
+                placeholderTextColor={colors.inkFaint}
+                autoCapitalize="none"
+                keyboardType="url"
+              />
+            </Field>
+
+            <Field label="Project Web App Link (optional)">
+              <TextInput
+                style={styles.input}
+                value={form.project_webapp_link}
+                onChangeText={(v) => setField('project_webapp_link', v)}
+                placeholder="https://… live demo / deployed project"
                 placeholderTextColor={colors.inkFaint}
                 autoCapitalize="none"
                 keyboardType="url"
@@ -156,19 +182,12 @@ export default function ProjectFormModal({ visible, initial, supervisors, onClos
 
             <View style={styles.actions}>
               <Button title="Cancel" variant="ghost" onPress={onClose} style={{ flex: 1 }} />
-              <Button
-                title={initial ? 'Save' : 'Add'}
-                variant="gold"
-                onPress={handleSubmit}
-                loading={saving}
-                style={{ flex: 1 }}
-              />
+              <Button title={submitLabel} variant="gold" onPress={handleSubmit} loading={saving} style={{ flex: 1 }} />
             </View>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
 
-      {/* Supervisor picker sub-modal */}
       <Modal visible={pickerOpen} animationType="fade" transparent onRequestClose={() => setPickerOpen(false)}>
         <Pressable style={styles.pickerOverlay} onPress={() => setPickerOpen(false)}>
           <View style={styles.pickerSheet}>
@@ -206,23 +225,17 @@ function Field({ label, children }) {
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(26,20,16,0.45)' },
-  sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '92%',
-  },
+  sheet: { backgroundColor: colors.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '92%' },
   head: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.surfaceEdge,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    padding: spacing.xl, borderBottomWidth: 1, borderBottomColor: colors.surfaceEdge,
   },
   headTitle: { fontFamily: fonts.displaySemiBold, fontSize: 20, color: colors.ink },
   close: { fontSize: 30, color: colors.inkFaint, lineHeight: 30 },
   body: { padding: spacing.xl },
+
+  hint: { backgroundColor: colors.goldWash, borderRadius: radius.sm, padding: spacing.md, marginBottom: spacing.lg },
+  hintText: { fontFamily: fonts.bodyMedium, color: colors.goldDeep, fontSize: 13 },
 
   alert: { backgroundColor: colors.dangerWash, borderRadius: radius.sm, padding: spacing.md, marginBottom: spacing.lg },
   alertText: { fontFamily: fonts.bodyMedium, color: colors.danger, fontSize: 14 },
@@ -230,15 +243,9 @@ const styles = StyleSheet.create({
   field: { marginBottom: spacing.lg },
   label: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.inkSoft, marginBottom: 7 },
   input: {
-    backgroundColor: colors.parchment,
-    borderWidth: 1,
-    borderColor: colors.surfaceEdge,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: 12,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 15,
-    color: colors.ink,
+    backgroundColor: colors.parchment, borderWidth: 1, borderColor: colors.surfaceEdge,
+    borderRadius: radius.sm, paddingHorizontal: spacing.lg, paddingVertical: 12,
+    fontFamily: fonts.bodyRegular, fontSize: 15, color: colors.ink,
   },
   textarea: { minHeight: 110, textAlignVertical: 'top' },
   pickerValue: { fontFamily: fonts.bodyRegular, fontSize: 15, color: colors.ink },
