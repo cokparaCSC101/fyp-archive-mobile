@@ -1,14 +1,20 @@
-// Small status / action pill used on the approval & request screens.
+// Small status / action pill used across the approval, request, complaint
+// and audit screens.
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, fonts, radius } from '../theme';
 
 const TONES = {
-  pending:  { bg: colors.goldWash,   fg: colors.goldDeep },
-  update:   { bg: colors.goldWash,   fg: colors.goldDeep },
-  approved: { bg: colors.tealWash,   fg: colors.teal },
-  create:   { bg: colors.tealWash,   fg: colors.teal },
-  denied:   { bg: colors.dangerWash, fg: colors.danger },
-  delete:   { bg: colors.dangerWash, fg: colors.danger },
+  pending:     { bg: colors.goldWash,   fg: colors.goldDeep },
+  update:      { bg: colors.goldWash,   fg: colors.goldDeep },
+  approved:    { bg: colors.tealWash,   fg: colors.teal },
+  create:      { bg: colors.tealWash,   fg: colors.teal },
+  denied:      { bg: colors.dangerWash, fg: colors.danger },
+  delete:      { bg: colors.dangerWash, fg: colors.danger },
+  // complaint statuses
+  open:        { bg: colors.dangerWash, fg: colors.danger },
+  seen:        { bg: colors.goldWash,   fg: colors.goldDeep },
+  in_progress: { bg: '#e6ecf1',         fg: '#3a5566' },
+  resolved:    { bg: colors.tealWash,   fg: colors.teal },
 };
 
 export default function Pill({ label, tone = 'pending' }) {

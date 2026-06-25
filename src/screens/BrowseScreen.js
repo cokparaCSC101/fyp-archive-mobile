@@ -22,7 +22,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 9 }, (_, i) => CURRENT_YEAR - i);
 
 export default function BrowseScreen({ navigation }) {
-  const { isStaff, canApprove, isLecturer, logout } = useAuth();
+  const { isStaff, canApprove, isLecturer, isAdmin, logout } = useAuth();
 
   const [projects, setProjects] = useState([]);
   const [page, setPage] = useState(1);
@@ -91,25 +91,36 @@ export default function BrowseScreen({ navigation }) {
 
   const renderHeader = () => (
     <View>
-      {(isStaff || canApprove) && (
-        <View style={styles.navRow}>
-          {isStaff && (
-            <Pressable style={styles.navChip} onPress={() => navigation.navigate('Admin')}>
-              <Text style={styles.navChipText}>Manage  →</Text>
-            </Pressable>
-          )}
-          {canApprove && (
-            <Pressable style={styles.navChip} onPress={() => navigation.navigate('Approvals')}>
-              <Text style={styles.navChipText}>Approvals  →</Text>
-            </Pressable>
-          )}
-          {isLecturer && (
-            <Pressable style={styles.navChip} onPress={() => navigation.navigate('MyRequests')}>
-              <Text style={styles.navChipText}>My Requests  →</Text>
-            </Pressable>
-          )}
-        </View>
-      )}
+      <View style={styles.navRow}>
+        {isStaff && (
+          <Pressable style={styles.navChip} onPress={() => navigation.navigate('Admin')}>
+            <Text style={styles.navChipText}>Manage  →</Text>
+          </Pressable>
+        )}
+        {canApprove && (
+          <Pressable style={styles.navChip} onPress={() => navigation.navigate('Approvals')}>
+            <Text style={styles.navChipText}>Approvals  →</Text>
+          </Pressable>
+        )}
+        {isLecturer && (
+          <Pressable style={styles.navChip} onPress={() => navigation.navigate('MyRequests')}>
+            <Text style={styles.navChipText}>My Requests  →</Text>
+          </Pressable>
+        )}
+        {canApprove && (
+          <Pressable style={styles.navChip} onPress={() => navigation.navigate('Audit')}>
+            <Text style={styles.navChipText}>Audit  →</Text>
+          </Pressable>
+        )}
+        {isAdmin && (
+          <Pressable style={styles.navChip} onPress={() => navigation.navigate('Complaints')}>
+            <Text style={styles.navChipText}>Complaints  →</Text>
+          </Pressable>
+        )}
+        <Pressable style={styles.navChip} onPress={() => navigation.navigate('Feedback')}>
+          <Text style={styles.navChipText}>Feedback  →</Text>
+        </Pressable>
+      </View>
 
       <Text style={styles.eyebrow}>COMPUTER SCIENCE DEPARTMENT</Text>
       <Text style={styles.title}>Project Archive</Text>

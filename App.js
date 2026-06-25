@@ -27,6 +27,9 @@ import ProjectDetailScreen from './src/screens/ProjectDetailScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import ApprovalsScreen from './src/screens/ApprovalsScreen';
 import MyRequestsScreen from './src/screens/MyRequestsScreen';
+import FeedbackScreen from './src/screens/FeedbackScreen';
+import ComplaintsScreen from './src/screens/ComplaintsScreen';
+import AuditScreen from './src/screens/AuditScreen';
 import { colors, fonts } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -77,6 +80,9 @@ function RootNavigator() {
               component={MyRequestsScreen}
               options={{ title: 'My Requests', headerBackTitle: 'Back' }}
             />
+            <Stack.Screen name="Feedback" component={FeedbackScreen} options={{ title: 'Feedback', headerBackTitle: 'Back' }} />
+            <Stack.Screen name="Complaints" component={ComplaintsScreen} options={{ title: 'Complaints', headerBackTitle: 'Back' }} />
+            <Stack.Screen name="Audit" component={AuditScreen} options={{ title: 'Audit Log', headerBackTitle: 'Back' }} />
           </>
         ) : (
           <>

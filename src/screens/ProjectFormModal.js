@@ -100,12 +100,6 @@ export default function ProjectFormModal({ visible, initial, supervisors, onClos
                 </Text>
               </View>
             ) : null}
-            {error ? (
-              <View style={styles.alert}>
-                <Text style={styles.alertText}>{error}</Text>
-              </View>
-            ) : null}
-
             <Field label="Project Title *">
               <TextInput
                 style={styles.input}
@@ -184,6 +178,11 @@ export default function ProjectFormModal({ visible, initial, supervisors, onClos
               <Button title="Cancel" variant="ghost" onPress={onClose} style={{ flex: 1 }} />
               <Button title={submitLabel} variant="gold" onPress={handleSubmit} loading={saving} style={{ flex: 1 }} />
             </View>
+            {error ? (
+              <View style={[styles.alert, { marginTop: spacing.md, marginBottom: 0 }]}>
+                <Text style={styles.alertText}>{error}</Text>
+              </View>
+            ) : null}
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
