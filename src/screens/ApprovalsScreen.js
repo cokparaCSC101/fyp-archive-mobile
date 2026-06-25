@@ -28,6 +28,24 @@ function fmtDate(d) {
   catch { return ''; }
 }
 
+function SimNote({ score, info }) {
+  let matches = [];
+  try { matches = JSON.parse(info || '[]'); } catch (e) { matches = []; }
+  const tone = score >= 60 ? 'high' : score >= 30 ? 'med' : 'low';
+  const label = score >= 60 ? 'High similarity' : score >= 30 ? 'Possible overlap'
+              : (matches.length ? 'Low similarity' : 'No close matches found');
+  const box = tone === 'high' ? styles.simHigh : tone === 'med' ? styles.simMed : styles.simLow;
+  const txt = tone === 'high' ? styles.simHighText : tone === 'med' ? styles.simMedText : styles.simLowText;
+  return (
+    <View style={[styles.sim, box]}>
+      <Text style={[styles.simLabel, txt]}>{label}{matches.length ? ` — ${score}% match` : ''}</Text>
+      {matches.map((m) => (
+        <Text key={m.project_id} style={[styles.simItem, txt]} numberOfLines={1}>{m.score}% · {m.title}</Text>
+      ))}
+    </View>
+  );
+}
+
 export default function ApprovalsScreen() {
   const [filter, setFilter] = useState('pending');
   const [requests, setRequests] = useState([]);
@@ -116,6 +134,10 @@ export default function ApprovalsScreen() {
       ) : (
         <Text style={styles.fields}>Requests removal of this project from the archive.</Text>
       )}
+
+      {r.action !== 'delete' && r.similarity_score != null ? (
+        <SimNote score={Number(r.similarity_score)} info={r.similarity_info} />
+      ) : null}
 
       {r.status === 'denied' && r.review_note ? (
         <View style={styles.note}><Text style={styles.noteText}><Text style={{ fontFamily: fonts.bodySemiBold }}>Reason: </Text>{r.review_note}</Text></View>
@@ -216,6 +238,16 @@ const styles = StyleSheet.create({
   abstract: { fontFamily: fonts.bodyRegular, fontSize: 13.5, color: colors.inkSoft, marginTop: 4, lineHeight: 19 },
   linkRow: { flexDirection: 'row', gap: spacing.lg, marginTop: spacing.sm },
   link: { fontFamily: fonts.bodySemiBold, fontSize: 13.5, color: colors.goldDeep },
+
+  sim: { marginTop: spacing.md, borderRadius: radius.sm, padding: spacing.md },
+  simHigh: { backgroundColor: colors.dangerWash },
+  simMed: { backgroundColor: colors.goldWash },
+  simLow: { backgroundColor: '#edf1ea' },
+  simLabel: { fontFamily: fonts.bodySemiBold, fontSize: 13, marginBottom: 2 },
+  simItem: { fontFamily: fonts.bodyRegular, fontSize: 12.5, marginTop: 1 },
+  simHighText: { color: colors.danger },
+  simMedText: { color: colors.goldDeep },
+  simLowText: { color: colors.inkSoft },
 
   note: { marginTop: spacing.md, backgroundColor: colors.dangerWash, borderRadius: radius.sm, padding: spacing.md },
   noteText: { fontFamily: fonts.bodyRegular, fontSize: 13, color: colors.danger },
