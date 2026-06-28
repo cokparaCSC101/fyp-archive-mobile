@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import api from '../api/client';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { colors, fonts, spacing, radius } from '../theme';
 
 const FILTERS = [
@@ -26,6 +28,8 @@ function fmtDate(d) {
 }
 
 export default function AuditScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [filter, setFilter] = useState('');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +85,7 @@ export default function AuditScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, padding: spacing.lg, paddingBottom: spacing.sm },
   chip: { borderWidth: 1, borderColor: colors.surfaceEdge, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 7, backgroundColor: colors.surface, alignSelf: 'flex-start' },

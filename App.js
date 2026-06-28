@@ -19,6 +19,7 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import VerifyScreen from './src/screens/VerifyScreen';
@@ -34,17 +35,18 @@ import { colors, fonts } from './src/theme';
 
 const Stack = createNativeStackNavigator();
 
-// Shared header styling for the academic-archive look.
-const screenOptions = {
-  headerStyle: { backgroundColor: colors.parchment },
-  headerShadowVisible: false,
-  headerTintColor: colors.ink,
-  headerTitleStyle: { fontFamily: fonts.displaySemiBold, color: colors.ink },
-  contentStyle: { backgroundColor: colors.parchment },
-};
-
 function RootNavigator() {
   const { user, loading } = useAuth();
+  const { colors } = useTheme();
+
+  // Header + screen colours follow the active theme.
+  const screenOptions = {
+    headerStyle: { backgroundColor: colors.parchment },
+    headerShadowVisible: false,
+    headerTintColor: colors.ink,
+    headerTitleStyle: { fontFamily: fonts.displaySemiBold, color: colors.ink },
+    contentStyle: { backgroundColor: colors.parchment },
+  };
 
   if (loading) {
     return (
@@ -116,10 +118,12 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <StatusBar style="dark" />
-        <RootNavigator />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <StatusBar style="dark" />
+          <RootNavigator />
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

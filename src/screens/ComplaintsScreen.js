@@ -5,6 +5,8 @@ import { View, Text, TextInput, FlatList, StyleSheet, Pressable, ActivityIndicat
 import api from '../api/client';
 import Button from '../components/Button';
 import Pill from '../components/Pill';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { colors, fonts, spacing, radius, shadow } from '../theme';
 
 const FILTERS = ['all', 'open', 'seen', 'in_progress', 'resolved'];
@@ -16,6 +18,8 @@ function fmtDate(d) {
 }
 
 function ComplaintRow({ c, onSaved }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [status, setStatus] = useState(c.status);
   const [response, setResponse] = useState(c.admin_response || '');
   const [saving, setSaving] = useState(false);
@@ -57,6 +61,8 @@ function ComplaintRow({ c, onSaved }) {
 }
 
 export default function ComplaintsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [filter, setFilter] = useState('all');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -101,7 +107,7 @@ export default function ComplaintsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, padding: spacing.lg, paddingBottom: spacing.sm },
   chip: { borderWidth: 1, borderColor: colors.surfaceEdge, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 7, backgroundColor: colors.surface, alignSelf: 'flex-start' },

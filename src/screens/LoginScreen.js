@@ -9,13 +9,18 @@ import {
   Platform,
   ScrollView,
   Pressable,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
-import { colors, fonts, spacing, radius } from '../theme';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
+import { colors, fonts, spacing, radius, showLogo } from '../theme';
 
 export default function LoginScreen({ navigation }) {
+  const { colors, showLogo } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -54,9 +59,13 @@ export default function LoginScreen({ navigation }) {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.brandRow}>
-          <View style={styles.brandMark}>
-            <Text style={styles.brandMarkText}>A</Text>
-          </View>
+          {showLogo ? (
+            <Image source={require('../assets/pau-logo.jpg')} style={styles.brandLogo} resizeMode="contain" />
+          ) : (
+            <View style={styles.brandMark}>
+              <Text style={styles.brandMarkText}>A</Text>
+            </View>
+          )}
           <View>
             <Text style={styles.brandTitle}>FYP Archive</Text>
             <Text style={styles.brandSub}>PAN-ATLANTIC UNIVERSITY</Text>
@@ -111,7 +120,7 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   container: { paddingHorizontal: spacing.xl, paddingBottom: spacing.xxl },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.xxl },
@@ -124,6 +133,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   brandMarkText: { fontFamily: fonts.displaySemiBold, color: colors.gold, fontSize: 22 },
+  brandLogo: { width: 96, height: 41 },
   brandTitle: { fontFamily: fonts.displaySemiBold, fontSize: 18, color: colors.ink },
   brandSub: { fontFamily: fonts.bodyMedium, fontSize: 10, color: colors.inkFaint, letterSpacing: 1 },
 

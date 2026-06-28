@@ -15,9 +15,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { colors, fonts, spacing, radius } from '../theme';
 
 export default function VerifyScreen({ navigation, route }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { verifyEmail, resendCode } = useAuth();
   const [email, setEmail] = useState(route.params?.email || '');
   const [code, setCode] = useState('');
@@ -131,7 +135,7 @@ export default function VerifyScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   container: { paddingHorizontal: spacing.xl, paddingBottom: spacing.xxl },
   heading: { fontFamily: fonts.displaySemiBold, fontSize: 30, color: colors.ink, marginBottom: 4 },

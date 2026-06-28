@@ -8,6 +8,8 @@ import {
 import api from '../api/client';
 import Button from '../components/Button';
 import Pill from '../components/Pill';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { colors, fonts, spacing, radius, shadow } from '../theme';
 
 const STATUS_LABEL = { open: 'open', seen: 'seen', in_progress: 'in progress', resolved: 'resolved' };
@@ -17,6 +19,8 @@ function fmtDate(d) {
 }
 
 export default function FeedbackScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -103,7 +107,7 @@ export default function FeedbackScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   content: { padding: spacing.xl, paddingBottom: spacing.xxl },
   lead: { fontFamily: fonts.bodyRegular, fontSize: 14, color: colors.inkSoft, marginBottom: spacing.lg, lineHeight: 20 },

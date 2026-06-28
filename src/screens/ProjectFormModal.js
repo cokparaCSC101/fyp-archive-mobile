@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import api from '../api/client';
 import Button from '../components/Button';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { colors, fonts, spacing, radius } from '../theme';
 
 const emptyForm = {
@@ -28,6 +30,8 @@ const emptyForm = {
 };
 
 export default function ProjectFormModal({ visible, initial, supervisors, onClose, onSaved, pendingMode = false }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -214,6 +218,8 @@ export default function ProjectFormModal({ visible, initial, supervisors, onClos
 }
 
 function Field({ label, children }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
@@ -222,7 +228,7 @@ function Field({ label, children }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(26,20,16,0.45)' },
   sheet: { backgroundColor: colors.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '92%' },
   head: {

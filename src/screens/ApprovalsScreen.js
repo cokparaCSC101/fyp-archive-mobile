@@ -18,6 +18,8 @@ import {
 import api from '../api/client';
 import Button from '../components/Button';
 import Pill from '../components/Pill';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { colors, fonts, spacing, radius, shadow } from '../theme';
 
 const FILTERS = ['pending', 'approved', 'denied', 'all'];
@@ -29,6 +31,8 @@ function fmtDate(d) {
 }
 
 function SimNote({ score, info }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   let matches = [];
   try { matches = JSON.parse(info || '[]'); } catch (e) { matches = []; }
   const tone = score >= 60 ? 'high' : score >= 30 ? 'med' : 'low';
@@ -47,6 +51,8 @@ function SimNote({ score, info }) {
 }
 
 export default function ApprovalsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [filter, setFilter] = useState('pending');
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -210,7 +216,7 @@ export default function ApprovalsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   filterRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: spacing.sm, padding: spacing.lg, paddingBottom: spacing.sm },
   chip: { borderWidth: 1, borderColor: colors.surfaceEdge, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 7, backgroundColor: colors.surface, alignSelf: 'flex-start' },

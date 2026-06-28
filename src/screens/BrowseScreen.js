@@ -11,17 +11,22 @@ import {
   Pressable,
   ActivityIndicator,
   RefreshControl,
+  Image,
 } from 'react-native';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import ProjectCard from '../components/ProjectCard';
-import { colors, fonts, spacing, radius } from '../theme';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
+import { colors, fonts, spacing, radius, showLogo } from '../theme';
 
 const LIMIT = 8;
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 9 }, (_, i) => CURRENT_YEAR - i);
 
 export default function BrowseScreen({ navigation }) {
+  const { colors, showLogo, theme, toggleTheme } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { isStaff, canApprove, isLecturer, isAdmin, logout } = useAuth();
 
   const [projects, setProjects] = useState([]);
@@ -41,13 +46,24 @@ export default function BrowseScreen({ navigation }) {
   // Header: title + sign-out button
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerStyle: { backgroundColor: showLogo ? colors.surface : colors.parchment },
+      headerLeft: showLogo
+        ? () => (
+            <Image
+              source={require('../assets/pau-logo.jpg')}
+              style={styles.headerLogo}
+              resizeMode="contain"
+            />
+          )
+        : undefined,
+      headerTitle: showLogo ? '' : 'Archive',
       headerRight: () => (
         <Pressable onPress={logout} hitSlop={10}>
           <Text style={styles.signOut}>Sign out</Text>
         </Pressable>
       ),
     });
-  }, [navigation, logout]);
+  }, [navigation, logout, colors, showLogo]);
 
   const fetchPage = useCallback(
     async (pageNum, mode = 'replace') => {
@@ -119,6 +135,9 @@ export default function BrowseScreen({ navigation }) {
         )}
         <Pressable style={styles.navChip} onPress={() => navigation.navigate('Feedback')}>
           <Text style={styles.navChipText}>Feedback  →</Text>
+        </Pressable>
+        <Pressable style={styles.navChip} onPress={toggleTheme}>
+          <Text style={styles.navChipText}>{theme === 'blue' ? 'Classic theme  ⟳' : 'PAU Blue  ⟳'}</Text>
         </Pressable>
       </View>
 
@@ -222,6 +241,8 @@ export default function BrowseScreen({ navigation }) {
 }
 
 function YearChip({ label, active, onPress }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Pressable onPress={onPress} style={[styles.yearChip, active && styles.yearChipActive]}>
       <Text style={[styles.yearChipText, active && styles.yearChipTextActive]}>{label}</Text>
@@ -229,9 +250,10 @@ function YearChip({ label, active, onPress }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   listContent: { padding: spacing.xl, paddingBottom: spacing.xxl, flexGrow: 1 },
+  headerLogo: { height: 30, width: 96, marginLeft: 12 },
   signOut: { fontFamily: fonts.bodySemiBold, color: colors.goldDeep, fontSize: 14 },
 
   navRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg },

@@ -15,9 +15,13 @@ import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import ProjectFormModal from './ProjectFormModal';
 import Button from '../components/Button';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { colors, fonts, spacing, radius, shadow } from '../theme';
 
 export default function AdminScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { isLecturer } = useAuth();
   const [projects, setProjects] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
@@ -153,7 +157,7 @@ export default function AdminScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xxl },
   listContent: { padding: spacing.xl, flexGrow: 1 },

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import api from '../api/client';
 import Pill from '../components/Pill';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { colors, fonts, spacing, radius, shadow } from '../theme';
 
 const ACTION_VERB = { create: 'New project', update: 'Edit to', delete: 'Remove' };
@@ -14,6 +16,8 @@ function fmtDate(d) {
 }
 
 export default function MyRequestsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -85,7 +89,7 @@ export default function MyRequestsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xxl, backgroundColor: colors.parchment },
   listContent: { padding: spacing.xl, flexGrow: 1 },

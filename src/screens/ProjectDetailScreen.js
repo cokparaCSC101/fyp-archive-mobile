@@ -3,9 +3,13 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Linking, Alert } from 'react-native';
 import api from '../api/client';
 import Button from '../components/Button';
+import { useMemo } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { colors, fonts, spacing, radius, shadow } from '../theme';
 
 export default function ProjectDetailScreen({ route }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { id } = route.params;
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -85,6 +89,8 @@ export default function ProjectDetailScreen({ route }) {
 }
 
 function MetaItem({ label, value }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.metaItem}>
       <Text style={styles.metaLabel}>{label}</Text>
@@ -93,7 +99,7 @@ function MetaItem({ label, value }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors) => StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.parchment },
   content: { padding: spacing.xl },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.parchment, padding: spacing.xxl, gap: spacing.sm },
